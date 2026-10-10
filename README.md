@@ -1,5 +1,11 @@
 # PortReach
 
+[![MIT License](https://img.shields.io/github/license/dimpletz/portreach)](https://github.com/dimpletz/portreach/blob/main/LICENSE)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue)](https://pypi.org/project/portreach/)
+[![PyPI version](https://img.shields.io/pypi/v/portreach)](https://pypi.org/project/portreach/)
+[![GitHub Actions CI](https://img.shields.io/github/actions/workflow/status/dimpletz/portreach/ci.yml?branch=main&label=CI)](https://github.com/dimpletz/portreach/actions/workflows/ci.yml)
+[![Security: Reviewed](https://img.shields.io/badge/security-reviewed-brightgreen)](https://github.com/dimpletz/portreach#security-and-scope)
+
 A lightweight Python utility for checking TCP port connectivity. PortReach is designed for developers, DevOps engineers, and system administrators who need a fast way to diagnose network accessibility from the command line.
 
 Release history: [CHANGELOG.md](CHANGELOG.md).
@@ -195,7 +201,11 @@ PortReach preserves the `✓` and `✗` status symbols when the output stream su
 
 ### From PyPI
 
-PortReach v0.1.0 has not been published to PyPI. Install from source using the instructions below; do not use `pip install portreach` until a release is published.
+PortReach v0.1.0 is published on PyPI. Install it with:
+
+```bash
+pip install portreach
+```
 
 ### From Source
 
@@ -902,9 +912,9 @@ pytest
 
 ### PyPI Release (Maintainers)
 
-PortReach v0.1.0 has not been published. Run `.github/workflows/publish.yml` manually from `main`, enter the existing release tag (for example, `v0.1.0`), and explicitly confirm publication. The workflow fetches that tag and only as much `main` history as needed to prove the tagged commit is reachable from `main`. It validates the version from the tag contents, records the tagged commit SHA, and requires the verification matrix and build job to check out that same SHA. It builds and validates distributions separately, then publishes only those artifacts after approval by the protected `pypi` GitHub environment, using PyPI Trusted Publishing (OIDC) without a long-lived PyPI token.
+PortReach v0.1.0 is published on PyPI. For future releases, run `.github/workflows/publish.yml` manually from `main`, enter the existing version tag, and explicitly confirm publication. The workflow fetches that tag and only as much `main` history as needed to prove the tagged commit is reachable from `main`. It validates the version from the tag contents, records the tagged commit SHA, and requires the verification matrix and build job to check out that same SHA. It builds and validates distributions separately, then publishes only those artifacts through the protected `pypi` GitHub environment using PyPI Trusted Publishing (OIDC), without a long-lived PyPI token.
 
-Before enabling publishing, protect `v*` tags with a repository ruleset that restricts tag creation, updates, and deletion to approved maintainers. Configure the `pypi` environment with required reviewers and allow deployments from `main`: GitHub evaluates environment branch/tag restrictions against the workflow dispatch ref (`main`), not the separately checked-out release tag. Restricting the environment to `v*` tags would block this main-dispatched workflow. Register a PyPI Trusted Publisher with owner `dimpletz`, repository `portreach`, workflow filename `publish.yml`, and environment `pypi`; because the project is not yet on PyPI, use PyPI's pending-publisher setup for the first publication if required.
+For future releases, protect `v*` tags with a repository ruleset that restricts tag creation, updates, and deletion to approved maintainers. The `pypi` environment allows deployments from `main`: GitHub evaluates environment branch/tag restrictions against the workflow dispatch ref (`main`), not the separately checked-out release tag. Restricting the environment to `v*` tags would block this main-dispatched workflow. The PyPI Trusted Publisher is configured with owner `dimpletz`, repository `portreach`, workflow filename `publish.yml`, and environment `pypi`.
 
 GitHub Actions are pinned to immutable commit SHAs to prevent mutable-tag substitution. Maintainers must deliberately update these pins when upgrading actions.
 
