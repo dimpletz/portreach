@@ -148,6 +148,28 @@ class TestResolveHostAddresses:
 class TestCheckPort:
     """Test single port checking."""
 
+    @pytest.mark.parametrize(
+        "timeout",
+        [float("nan"), float("inf"), float("-inf"), 0, -1, 1e300, "nan"],
+    )
+    def test_invalid_timeout_raises_value_error(self, timeout):
+        with pytest.raises(ValueError, match="timeout"):
+            check_port("127.0.0.1", 1, timeout=timeout)
+
+    def test_check_ports_rejects_invalid_timeout_with_no_ports(self):
+        with pytest.raises(ValueError, match="timeout"):
+            check_ports("127.0.0.1", [], timeout=float("nan"))
+
+    def test_finite_positive_timeout_checks_open_port(self):
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server:
+            server.bind(("127.0.0.1", 0))
+            server.listen(1)
+            port = server.getsockname()[1]
+
+            result = check_port("127.0.0.1", port, timeout=0.5)
+
+        assert result.status == "open"
+
     def test_open_port(self):
         """Test detecting an open port."""
         # Create a simple server socket to have an open port

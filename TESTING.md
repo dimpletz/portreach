@@ -199,7 +199,7 @@ Run the platform-appropriate release verifier:
 Install in development mode: `pip install -e ".[dev]"`
 
 ### Status symbols fail to print on Windows
-Enable Python UTF-8 mode (`PYTHONUTF8=1`) in terminals using a legacy text encoding.
+PortReach automatically uses ASCII status markers when the output stream cannot encode the Unicode symbols.
 
 ### Ephemeral port tests fail
 Verify Python can create sockets: `python -c "import socket; s = socket.socket(); s.bind(('127.0.0.1', 0)); print(s.getsockname()); s.close()"`

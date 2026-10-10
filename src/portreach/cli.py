@@ -6,7 +6,7 @@ import sys
 from typing import TextIO
 
 from portreach import __version__
-from portreach.checker import check_ports, parse_ports
+from portreach.checker import _validate_timeout, check_ports, parse_ports
 from portreach.exceptions import PortReachError
 from portreach.models import CheckResult, PortResult
 
@@ -140,10 +140,12 @@ def main(argv: list[str] | None = None) -> int:  # noqa: C901
         # argparse calls sys.exit on error or --help
         return e.code if isinstance(e.code, int) else 2
 
-    # Validate timeout
-    if args.timeout <= 0:
+    # Validate timeout before parsing ports or attempting network operations.
+    try:
+        _validate_timeout(args.timeout)
+    except ValueError as e:
         if not args.quiet:
-            print("Error: timeout must be greater than 0", file=sys.stderr)
+            print(f"Error: {e}", file=sys.stderr)
         return 2
 
     # Parse ports
@@ -165,7 +167,7 @@ def main(argv: list[str] | None = None) -> int:  # noqa: C901
     # Check ports
     try:
         result = check_ports(args.host, ports, timeout=args.timeout)
-    except PortReachError as e:
+    except (PortReachError, ValueError) as e:
         if not args.quiet:
             print(f"Error: {e}", file=sys.stderr)
         return 2

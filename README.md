@@ -486,7 +486,7 @@ Resolve and check hosts by DNS name:
 
 ```bash
 $ portreach example.com 80
-$ portreach api.internal.company.com 443
+$ portreach api.example.com 443
 $ portreach localhost 8080
 ```
 

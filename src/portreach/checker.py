@@ -1,5 +1,6 @@
 """Core port checking functionality."""
 
+import math
 import socket
 from collections.abc import Sequence
 
@@ -9,6 +10,24 @@ from portreach.exceptions import (
     InvalidRangeError,
 )
 from portreach.models import CheckResult, PortResult
+
+
+def _validate_timeout(timeout: float) -> None:
+    try:
+        valid_timeout = math.isfinite(timeout) and timeout > 0
+    except (OverflowError, TypeError):
+        valid_timeout = False
+
+    if not valid_timeout:
+        raise ValueError("timeout must be a finite positive number")
+
+    probe = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    try:
+        probe.settimeout(timeout)
+    except (OverflowError, TypeError, ValueError) as exc:
+        raise ValueError("timeout is outside the supported platform range") from exc
+    finally:
+        probe.close()
 
 
 def validate_port(port: int) -> None:
@@ -124,7 +143,12 @@ def check_port(host: str, port: int, timeout: float = 2.0) -> PortResult:
         PortResult with status "open" or "closed".
     """
     validate_port(port)
+    _validate_timeout(timeout)
 
+    return _check_port_validated(host, port, timeout)
+
+
+def _check_port_validated(host: str, port: int, timeout: float) -> PortResult:
     try:
         addresses = _resolve_host_addresses(host)
     except InvalidHostError as e:
@@ -168,5 +192,9 @@ def check_ports(
     Returns:
         CheckResult with results for each port.
     """
-    results = [check_port(host, port, timeout) for port in ports]
+    _validate_timeout(timeout)
+    results = []
+    for port in ports:
+        validate_port(port)
+        results.append(_check_port_validated(host, port, timeout))
     return CheckResult(host=host, results=results, timeout=timeout)

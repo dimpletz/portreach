@@ -1,7 +1,10 @@
 """Tests for CLI interface."""
 
 import json
+import shutil
 import socket
+import subprocess
+import sys
 from io import BytesIO, StringIO, TextIOWrapper
 from unittest.mock import patch
 
@@ -127,6 +130,37 @@ class TestFormatting:
 
 class TestCLIExecution:
     """Test CLI main function execution."""
+
+    @pytest.mark.parametrize(
+        "timeout",
+        ["nan", "inf", "-inf", "NaN", "Infinity", "0", "-1", "1e300", "not-a-number"],
+    )
+    def test_invalid_timeout_returns_configuration_error_without_traceback(self, timeout):
+        stderr = StringIO()
+        with patch("sys.stderr", new=stderr):
+            exit_code = main(["127.0.0.1", "1", "--timeout", timeout])
+
+        assert exit_code == 2
+        assert "Traceback" not in stderr.getvalue()
+        assert stderr.getvalue().strip()
+
+    def test_invalid_timeout_module_and_console_entry_points(self):
+        entry_points = [[sys.executable, "-m", "portreach"]]
+        console = shutil.which("portreach")
+        if console:
+            entry_points.append([console])
+
+        for entry_point in entry_points:
+            for timeout in ("nan", "inf", "-inf", "NaN", "Infinity", "1e300"):
+                result = subprocess.run(
+                    [*entry_point, "127.0.0.1", "1", "--timeout", timeout],
+                    capture_output=True,
+                    text=True,
+                    timeout=5,
+                )
+                assert result.returncode == 2, result.stderr
+                assert "Traceback" not in result.stderr
+                assert result.stderr.strip()
 
     def test_all_ports_open_exit_code(self):
         """All open ports should return exit code 0."""
