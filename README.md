@@ -900,6 +900,14 @@ mypy src tests
 pytest
 ```
 
+### PyPI Release (Maintainers)
+
+PortReach v0.1.0 has not been published. Run `.github/workflows/publish.yml` manually from `main`, enter the existing release tag (for example, `v0.1.0`), and explicitly confirm publication. The workflow fetches that tag and only as much `main` history as needed to prove the tagged commit is reachable from `main`. It validates the version from the tag contents, records the tagged commit SHA, and requires the verification matrix and build job to check out that same SHA. It builds and validates distributions separately, then publishes only those artifacts after approval by the protected `pypi` GitHub environment, using PyPI Trusted Publishing (OIDC) without a long-lived PyPI token.
+
+Before enabling publishing, protect `v*` tags with a repository ruleset that restricts tag creation, updates, and deletion to approved maintainers. Configure the `pypi` environment with required reviewers and allow deployments from `main`: GitHub evaluates environment branch/tag restrictions against the workflow dispatch ref (`main`), not the separately checked-out release tag. Restricting the environment to `v*` tags would block this main-dispatched workflow. Register a PyPI Trusted Publisher with owner `dimpletz`, repository `portreach`, workflow filename `publish.yml`, and environment `pypi`; because the project is not yet on PyPI, use PyPI's pending-publisher setup for the first publication if required.
+
+GitHub Actions are pinned to immutable commit SHAs to prevent mutable-tag substitution. Maintainers must deliberately update these pins when upgrading actions.
+
 ---
 
 ## Project Structure
